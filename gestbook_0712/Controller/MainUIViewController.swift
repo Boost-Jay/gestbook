@@ -8,6 +8,7 @@ class MainUIViewController: UIViewController, SFSpeechRecognizerDelegate {
     var itemArray: [ItemTable] = []
         let realm = try! Realm()
 
+    
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var textLabel: UILabel!
     @IBOutlet weak var tagLabel: UILabel!
@@ -22,6 +23,8 @@ class MainUIViewController: UIViewController, SFSpeechRecognizerDelegate {
     @IBOutlet weak var down: UIView!
     @IBOutlet weak var nameText: UITextField!
     @IBOutlet weak var idLabel: UILabel!
+    @IBOutlet weak var tableViewHeightConstraint: NSLayoutConstraint!
+    
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "zh-TW"))  // 使用中文
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
@@ -92,6 +95,10 @@ class MainUIViewController: UIViewController, SFSpeechRecognizerDelegate {
         // 重新加載表格視圖以顯示新的項目
         loadItems()
         tableView.reloadData()
+        tableView.layoutIfNeeded()
+        tableViewHeightConstraint.constant = tableView.contentSize.height
+            view.layoutIfNeeded()
+
         
         // 顯示 messageButton
             messageButton.isHidden = false
@@ -114,6 +121,9 @@ class MainUIViewController: UIViewController, SFSpeechRecognizerDelegate {
 //            }
         // 重新加載表格視圖
         tableView.reloadData()
+        tableView.layoutIfNeeded()
+        tableViewHeightConstraint.constant = tableView.contentSize.height
+            view.layoutIfNeeded()
     }
 
     @IBAction func oldButtonTapped(_ sender: UIButton) {
@@ -122,6 +132,10 @@ class MainUIViewController: UIViewController, SFSpeechRecognizerDelegate {
 
         // 重新加載表格視圖
         tableView.reloadData()
+        tableView.reloadData()
+        tableView.layoutIfNeeded()
+        tableViewHeightConstraint.constant = tableView.contentSize.height
+            view.layoutIfNeeded()
     }
     
     @IBAction func messageButtonTapped(_ sender: UIButton) {
@@ -143,15 +157,21 @@ class MainUIViewController: UIViewController, SFSpeechRecognizerDelegate {
         super.viewDidLoad()
 //        print("這裡啦")
         
+        tableView.isScrollEnabled = false
+        tableView.reloadData()
+        tableView.layoutIfNeeded()
+        tableViewHeightConstraint.constant = tableView.contentSize.height
+            view.layoutIfNeeded()
+
         
+        print(Realm.Configuration.defaultConfiguration.fileURL!)
         
-//        print(Realm.Configuration.defaultConfiguration.fileURL!)
-        
-//        let item = ItemTable()
-//            item.id = 1
+        let item = ItemTable()
+//            item.id = "1"
 //            item.name = "冰淇淋"
 //            item.message = "冰淇淋好好吃"
 //            saveItem(item)
+//        saveItem(item)
         
         
         let newId = realm.objects(ItemTable.self).count + 1
@@ -169,7 +189,6 @@ class MainUIViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView?.register(UINib(nibName: "MainTableViewCell", bundle: nil), forCellReuseIdentifier: MainTableViewCell.identified)
         tableView?.delegate = self
         tableView.dataSource = self
-        down.transform = CGAffineTransform(rotationAngle: .pi / 2)
         
         idLabel.isHidden = true
         nameText.isHidden = true
@@ -355,6 +374,7 @@ extension MainUIViewController: UITableViewDelegate, UITableViewDataSource {
             let susses = UIAlertController(title: "SUSSES", message: "項目已更新成功", preferredStyle: .alert)
             let action2 = UIAlertAction(title: "確認", style: .default) { (action2) in
                 self.tableView.reloadData()
+                
             }
             susses.addAction(action2)
 
@@ -370,6 +390,10 @@ extension MainUIViewController: UITableViewDelegate, UITableViewDataSource {
                         itemToEdit.message = message
                     }
                     self.present(susses, animated: true, completion: nil) // 顯示"susses"對話框
+                    // 重新計算並設定 TableView 高度
+                    self.tableView.layoutIfNeeded()
+                    self.tableViewHeightConstraint.constant = self.tableView.contentSize.height
+                    self.view.layoutIfNeeded()
                 }
             }
 
@@ -429,6 +453,10 @@ extension MainUIViewController: UITableViewDelegate, UITableViewDataSource {
                 self.itemArray.remove(at: indexPath.row)
                 self.tableView.deleteRows(at: [indexPath], with: .automatic)
                 self.tableView.reloadData()
+                // 重新計算並設定 TableView 高度
+                self.tableView.layoutIfNeeded()
+                self.tableViewHeightConstraint.constant = self.tableView.contentSize.height
+                self.view.layoutIfNeeded()
             }
             successAlert.addAction(okAction)
             // 顯示成功的提示框
